@@ -4,4 +4,5 @@ export DB_LOGIN=stud
 export DB_PASSWORD=stud
 export DB_DATABASE=archdb
 
-./build/Software-engineering
+./build/hl_mai_lab_01
+

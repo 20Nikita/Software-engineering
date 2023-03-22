@@ -11,13 +11,13 @@ paths:
     get:
       summary: Поиск пользователей по маске имени и фамилии
       parameters:
-      - name: name
+      - name: first_name
         description: Имя
         in: query
         required: true
         schema:
           type: string
-      - name: surname
+      - name: last_name
         description: Фамилия
         in: query
         required: true
@@ -90,6 +90,30 @@ paths:
     post:
       summary: Добавление нового пользователя
       parameters:
+      - name: first_name
+        description: Имя пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: last_name
+        description: Фамилия пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: email
+        description: email пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: title
+        description: Форма обращение к пользователя 
+        in: query
+        required: true
+        schema:
+          type: string
       - name: login
         description: login пользователя
         in: query
@@ -102,25 +126,6 @@ paths:
         required: true
         schema:
           type: string
-      - name: name
-        description: Имя пользователя
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: surname
-        description: Фамилия пользователя
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: address
-        description: Адрес пользователя
-        in: query
-        required: true
-        schema:
-          type: string
-
       responses:
         '200':
           description: Идентификатор, добавленного пользователя
@@ -153,23 +158,26 @@ components:
       type: object
       required:
         - id
+        - first_name
+        - last_name
+        - email
+        - title
         - login
         - password
-        - name
-        - surname
-        - address
       properties:
         id:
           $ref: '#/components/schemas/user_id'
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        title:
+          type: string
         login:
           type: string
         password:
-          type: string
-        name:
-          type: string
-        surname:
-          type: string
-        address:
           type: string
     Error:
       type: object

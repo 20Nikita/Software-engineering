@@ -87,6 +87,28 @@ private:
         return true;
     };
 
+    bool check_email(const std::string &email, std::string &reason)
+    {
+        if (email.find('@') == std::string::npos)
+        {
+            reason = "Email must contain @";
+            return false;
+        }
+
+        if (email.find(' ') != std::string::npos)
+        {
+            reason = "EMail can't contain spaces";
+            return false;
+        }
+
+        if (email.find('\t') != std::string::npos)
+        {
+            reason = "EMail can't contain spaces";
+            return false;
+        }
+
+        return true;
+    };
 
 public:
     UserHandler(const std::string &format) : _format(format)
@@ -175,8 +197,8 @@ public:
             else if (hasSubstr(request.getURI(), "/search"))
             {
 
-                std::string fn = form.get("name");
-                std::string ln = form.get("surname");
+                std::string fn = form.get("first_name");
+                std::string ln = form.get("last_name");
                 auto results = database::User::search(fn, ln);
                 Poco::JSON::Array arr;
                 for (auto s : results)
@@ -191,27 +213,35 @@ public:
             }
             else if (request.getMethod() == Poco::Net::HTTPRequest::HTTP_POST)
             {
-                if (form.has("login") && form.has("password") && form.has("name") && form.has("surname") && form.has("address"))
+                if (form.has("first_name") && form.has("last_name") && form.has("email") && form.has("title") && form.has("login") && form.has("password"))
                 {
                     database::User user;
+                    user.first_name() = form.get("first_name");
+                    user.last_name() = form.get("last_name");
+                    user.email() = form.get("email");
+                    user.title() = form.get("title");
                     user.login() = form.get("login");
                     user.password() = form.get("password");
-                    user.name() = form.get("name");
-                    user.surname() = form.get("surname");
-                    user.address() = form.get("address");
 
                     bool check_result = true;
                     std::string message;
                     std::string reason;
 
-                    if (!check_name(user.get_name(), reason))
+                    if (!check_name(user.get_first_name(), reason))
                     {
                         check_result = false;
                         message += reason;
                         message += "<br>";
                     }
 
-                    if (!check_name(user.get_surname(), reason))
+                    if (!check_name(user.get_last_name(), reason))
+                    {
+                        check_result = false;
+                        message += reason;
+                        message += "<br>";
+                    }
+
+                    if (!check_email(user.get_email(), reason))
                     {
                         check_result = false;
                         message += reason;
