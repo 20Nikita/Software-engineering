@@ -29,8 +29,8 @@ services:
 
   my_service:
     build:
-      context: my_service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: my_service/Dockerfile
     container_name: my_service
     environment:
       - DB_HOST=mai-db-node-ex01
@@ -45,10 +45,11 @@ services:
     depends_on:
       mai-db-node-ex01:
         condition: service_healthy
+        
   other_server:
     build:
-      context: other_server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: other_server/Dockerfile
     container_name: other_server
     environment:
       - SERVICE_HOST=my_service
