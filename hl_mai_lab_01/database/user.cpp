@@ -31,8 +31,7 @@ namespace database
                         << "`last_name` VARCHAR(256) NOT NULL,"
                         << "`login` VARCHAR(256) NOT NULL,"
                         << "`password` VARCHAR(256) NOT NULL,"
-                        << "`email` VARCHAR(256) NULL,"
-                        << "`title` VARCHAR(1024) NULL,"
+                        << "`addres` VARCHAR(256) NULL,"
                         << "PRIMARY KEY (`id`),KEY `fn` (`first_name`),KEY `ln` (`last_name`));",
                 now;
         }
@@ -57,8 +56,7 @@ namespace database
         root->set("id", _id);
         root->set("first_name", _first_name);
         root->set("last_name", _last_name);
-        root->set("email", _email);
-        root->set("title", _title);
+        root->set("addres", _addres);
         root->set("login", _login);
         root->set("password", _password);
 
@@ -75,8 +73,7 @@ namespace database
         user.id() = object->getValue<long>("id");
         user.first_name() = object->getValue<std::string>("first_name");
         user.last_name() = object->getValue<std::string>("last_name");
-        user.email() = object->getValue<std::string>("email");
-        user.title() = object->getValue<std::string>("title");
+        user.addres() = object->getValue<std::string>("addres");
         user.login() = object->getValue<std::string>("login");
         user.password() = object->getValue<std::string>("password");
 
@@ -119,12 +116,11 @@ namespace database
             Poco::Data::Session session = database::Database::get().create_session();
             Poco::Data::Statement select(session);
             User a;
-            select << "SELECT id, first_name, last_name, email, title,login,password FROM User where id=?",
+            select << "SELECT id, first_name, last_name, addres,login,password FROM User where id=?",
                 into(a._id),
                 into(a._first_name),
                 into(a._last_name),
-                into(a._email),
-                into(a._title),
+                into(a._addres),
                 into(a._login),
                 into(a._password),
                 use(id),
@@ -156,12 +152,11 @@ namespace database
             Statement select(session);
             std::vector<User> result;
             User a;
-            select << "SELECT id, first_name, last_name, email, title, login, password FROM User",
+            select << "SELECT id, first_name, last_name, addres, login, password FROM User",
                 into(a._id),
                 into(a._first_name),
                 into(a._last_name),
-                into(a._email),
-                into(a._title),
+                into(a._addres),
                 into(a._login),
                 into(a._password),
                 range(0, 1); //  iterate over result set one row at a time
@@ -197,12 +192,11 @@ namespace database
             User a;
             first_name += "%";
             last_name += "%";
-            select << "SELECT id, first_name, last_name, email, title, login, password FROM User where first_name LIKE ? and last_name LIKE ?",
+            select << "SELECT id, first_name, last_name, addres, login, password FROM User where first_name LIKE ? and last_name LIKE ?",
                 into(a._id),
                 into(a._first_name),
                 into(a._last_name),
-                into(a._email),
-                into(a._title),
+                into(a._addres),
                 into(a._login),
                 into(a._password),
                 use(first_name),
@@ -238,11 +232,10 @@ namespace database
             Poco::Data::Session session = database::Database::get().create_session();
             Poco::Data::Statement insert(session);
 
-            insert << "INSERT INTO User (first_name,last_name,email,title,login,password) VALUES(?, ?, ?, ?, ?, ?)",
+            insert << "INSERT INTO User (first_name,last_name,addres,login,password) VALUES(?, ?, ?, ?, ?)",
                 use(_first_name),
                 use(_last_name),
-                use(_email),
-                use(_title),
+                use(_addres),
                 use(_login),
                 use(_password);
 
@@ -307,14 +300,9 @@ namespace database
         return _last_name;
     }
 
-    const std::string &User::get_email() const
+    const std::string &User::get_addres() const
     {
-        return _email;
-    }
-
-    const std::string &User::get_title() const
-    {
-        return _title;
+        return _addres;
     }
 
     long &User::id()
@@ -332,13 +320,8 @@ namespace database
         return _last_name;
     }
 
-    std::string &User::email()
+    std::string &User::addres()
     {
-        return _email;
-    }
-
-    std::string &User::title()
-    {
-        return _title;
+        return _addres;
     }
 }

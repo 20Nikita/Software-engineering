@@ -13,8 +13,7 @@ namespace database
             long _id;
             std::string _first_name;
             std::string _last_name;
-            std::string _email;
-            std::string _title;
+            std::string _addres;
             std::string _login;
             std::string _password;
 
@@ -25,16 +24,14 @@ namespace database
             long             get_id() const;
             const std::string &get_first_name() const;
             const std::string &get_last_name() const;
-            const std::string &get_email() const;
-            const std::string &get_title() const;
+            const std::string &get_addres() const;
             const std::string &get_login() const;
             const std::string &get_password() const;
 
             long&        id();
             std::string &first_name();
             std::string &last_name();
-            std::string &email();
-            std::string &title();
+            std::string &addres();
             std::string &login();
             std::string &password();
 

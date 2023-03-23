@@ -2,7 +2,7 @@ openapi: '3.0.0'
 info:
   version: '1.0.0'
   title: 'Arch Lab Example API'
-  description: Пример API для первого домашнего задания по курсу Архитектура программных систем
+  description: API для второго домашнего задания по курсу Архитектура программных систем
 servers:
   - url: http://localhost:8080
     description: Example server
@@ -102,14 +102,8 @@ paths:
         required: true
         schema:
           type: string
-      - name: email
-        description: email пользователя
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: title
-        description: Форма обращение к пользователя 
+      - name: addres
+        description: Адрес пользователя
         in: query
         required: true
         schema:
@@ -160,8 +154,7 @@ components:
         - id
         - first_name
         - last_name
-        - email
-        - title
+        - addres
         - login
         - password
       properties:
@@ -171,9 +164,7 @@ components:
           type: string
         last_name:
           type: string
-        email:
-          type: string
-        title:
+        addres:
           type: string
         login:
           type: string
