@@ -19,6 +19,17 @@
 #include "Poco/Util/Option.h"
 #include "Poco/Util/OptionSet.h"
 #include "Poco/Util/HelpFormatter.h"
+
+#include <Poco/URIStreamFactory.h>
+#include <Poco/URIStreamOpener.h>
+#include <Poco/Net/HTTPSStreamFactory.h>
+#include <Poco/Net/HTTPStreamFactory.h>
+#include <Poco/Base64Encoder.h>
+#include <Poco/Base64Decoder.h>
+
+#include "Poco/URI.h"
+#include "Poco/Net/HTTPSClientSession.h"
+
 #include <iostream>
 #include <iostream>
 #include <fstream>
@@ -92,6 +103,52 @@ public:
     {
     }
 
+    std::optional<std::string> do_get(const std::string &url, const std::string &login, const std::string &password)
+    {
+        std::string string_result;
+        try
+        {
+            std::string token = login + ":" + password;
+            std::ostringstream os;
+            Poco::Base64Encoder b64in(os);
+            b64in << token;
+            b64in.close();
+            std::string identity = "Basic " + os.str();
+
+            Poco::URI uri(url);
+            Poco::Net::HTTPClientSession s(uri.getHost(), uri.getPort());
+            Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, uri.toString());
+            request.setVersion(Poco::Net::HTTPMessage::HTTP_1_1);
+            request.setContentType("application/json");
+            request.set("Authorization", identity);
+            request.set("Accept", "application/json");
+            request.setKeepAlive(true);
+
+            s.sendRequest(request);
+
+            Poco::Net::HTTPResponse response;
+            std::istream &rs = s.receiveResponse(response);
+
+            while (rs)
+            {
+                char c{};
+                rs.read(&c, 1);
+                if (rs)
+                    string_result += c;
+            }
+
+            if (response.getStatus() != 200)
+                return {};
+        }
+        catch (Poco::Exception &ex)
+        {
+            std::cout << "exception:" << ex.what() << std::endl;
+            return std::optional<std::string>();
+        }
+
+        return string_result;
+    }
+
     Poco::JSON::Object::Ptr remove_password(Poco::JSON::Object::Ptr src)
     {
         if (src->has("password"))
@@ -103,6 +160,7 @@ public:
                        HTTPServerResponse &response)
     {
         HTMLForm form(request, request.stream());
+        
         try
         {
             if (form.has("id") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
@@ -139,21 +197,28 @@ public:
             else if (hasSubstr(request.getURI(), "/search"))
             {
 
-                std::string login = form.get("login");
-                auto results = database::Package::search(login);
-                Poco::JSON::Array arr;
-                for (auto s : results)
-                    arr.add(remove_password(s.toJSON()));
-                response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
-                response.setChunkedTransferEncoding(true);
-                response.setContentType("application/json");
-                std::ostream &ostr = response.send();
-                Poco::JSON::Stringifier::stringify(arr, ostr);
+                    std::string login2 = form.get("login");
+                    auto results = database::Package::search(login2);
+                    Poco::JSON::Array arr;
+                    for (auto s : results)
+                        arr.add(remove_password(s.toJSON()));
+                    response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+                    response.setChunkedTransferEncoding(true);
+                    response.setContentType("application/json");
+                    std::ostream &ostr = response.send();
+                    Poco::JSON::Stringifier::stringify(arr, ostr);
 
-                return;
+                    return;
             }
             else if (request.getMethod() == Poco::Net::HTTPRequest::HTTP_POST)
             {
+
+                std::string host = "localhost";
+                std::string url;
+                if(std::getenv("SERVICE_HOST")!=nullptr) host = std::getenv("SERVICE_HOST");
+                url = "http://" + host+":8080/auth";
+
+
                 if (form.has("name") && form.has("weight") && form.has("price") && form.has("login") && form.has("password"))
                 {
                     database::Package user;
@@ -162,36 +227,40 @@ public:
                     user.price() = form.get("price");
                     user.login() = form.get("login");
                     user.password() = form.get("password");
-
-                    bool check_result = true;
-                    std::string message;
-                    std::string reason;
-
-                    if (!check_name(user.get_name(), reason))
+                    if (do_get(url, user.get_login(), user.get_password())) // do authentificate
                     {
-                        check_result = false;
-                        message += reason;
-                        message += "<br>";
-                    }
 
 
-                    if (check_result)
-                    {
-                        user.save_to_mysql();
-                        response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
-                        response.setChunkedTransferEncoding(true);
-                        response.setContentType("application/json");
-                        std::ostream &ostr = response.send();
-                        ostr << user.get_id();
-                        return;
-                    }
-                    else
-                    {
-                        response.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
-                        std::ostream &ostr = response.send();
-                        ostr << message;
-                        response.send();
-                        return;
+                        bool check_result = true;
+                        std::string message;
+                        std::string reason;
+
+                        if (!check_name(user.get_name(), reason))
+                        {
+                            check_result = false;
+                            message += reason;
+                            message += "<br>";
+                        }
+
+
+                        if (check_result)
+                        {
+                            user.save_to_mysql();
+                            response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+                            response.setChunkedTransferEncoding(true);
+                            response.setContentType("application/json");
+                            std::ostream &ostr = response.send();
+                            ostr << user.get_id();
+                            return;
+                        }
+                        else
+                        {
+                            response.setStatus(Poco::Net::HTTPResponse::HTTP_NOT_FOUND);
+                            std::ostream &ostr = response.send();
+                            ostr << message;
+                            response.send();
+                            return;
+                        }
                     }
                 }
             }
