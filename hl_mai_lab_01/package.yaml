@@ -2,23 +2,17 @@ openapi: '3.0.0'
 info:
   version: '1.0.0'
   title: 'Arch Lab Example API'
-  description: API для второго домашнего задания по курсу Архитектура программных систем
+  description: API для сервиса посылок
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8082
     description: Example server
 paths:
   /search:
     get:
-      summary: Поиск пользователей по маске имени и фамилии
+      summary: Поиск посылок по логину
       parameters:
-      - name: first_name
-        description: Имя
-        in: query
-        required: true
-        schema:
-          type: string
-      - name: last_name
-        description: Фамилия
+      - name: login
+        description: Логин
         in: query
         required: true
         schema:
@@ -42,57 +36,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /auth:
-    get:
-      summary: Проверка аутентификации
-      responses:
-        '200':
-          description: User ID
-          content:
-            application/json:
-              schema:
-               type: string
-        401:
-          description: Not authentication
-          content:
-            application/json:
-              schema:
-                type: string
-  /read_by_login:
-    get:
-      summary: Чтение информации о пользователе
-      parameters:
-      - name: login
-        description: login пользователя
-        in: query
-        required: true
-        schema:
-          $ref: '#/components/schemas/user_id'
-      responses:
-        '200':
-          description: Найденный пользователь
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/user'
-        404:
-          description: Пользователь не найден
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        500:
-          description: Неожиданная ошибка
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
   /user:
     get:
-      summary: Чтение информации о пользователе
+      summary: Чтение информации о посылке
       parameters:
       - name: id
-        description: Уникальный идентификатор пользователя
+        description: Уникальный идентификатор посылки
         in: query
         required: true
         schema:
@@ -118,22 +67,22 @@ paths:
                 $ref: '#/components/schemas/Error'
 
     post:
-      summary: Добавление нового пользователя
+      summary: Добавление новой посылки
       parameters:
-      - name: first_name
-        description: Имя пользователя
+      - name: name
+        description: Имя посылки
         in: query
         required: true
         schema:
           type: string
-      - name: last_name
-        description: Фамилия пользователя
+      - name: weight
+        description: Вес посылки
         in: query
         required: true
         schema:
           type: string
-      - name: addres
-        description: Адрес пользователя
+      - name: price
+        description: Цена посылки
         in: query
         required: true
         schema:
@@ -152,7 +101,7 @@ paths:
           type: string
       responses:
         '200':
-          description: Идентификатор, добавленного пользователя
+          description: Идентификатор, добавленной посылки
           content:
             application/json:
               schema:
@@ -182,19 +131,19 @@ components:
       type: object
       required:
         - id
-        - first_name
-        - last_name
-        - addres
+        - name
+        - weight
+        - price
         - login
         - password
       properties:
         id:
           $ref: '#/components/schemas/user_id'
-        first_name:
+        name:
           type: string
-        last_name:
+        weight:
           type: string
-        addres:
+        price:
           type: string
         login:
           type: string

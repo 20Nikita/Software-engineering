@@ -4,6 +4,7 @@ project(hl_server C CXX)
 
 SET (EXAMPLE_BINARY "Software-engineering")
 SET (OTHER_SERVICE "other_service")
+SET (PACKAGE_SERVICE "package_service")
 
 find_package(OpenSSL)
 find_package(Threads)
@@ -60,6 +61,22 @@ target_link_libraries(${OTHER_SERVICE} PRIVATE
                              ZLIB::ZLIB)
 
 
+add_executable(${PACKAGE_SERVICE} package_main.cpp 
+                                 config/config.cpp 
+                                 database/database.cpp
+                                 database/package.cpp)
 
+target_include_directories(${PACKAGE_SERVICE} PRIVATE "${CMAKE_BINARY_DIR}")
+target_compile_options(${PACKAGE_SERVICE} PRIVATE -Wall -Wextra -pedantic -Werror )
+set_target_properties(${PACKAGE_SERVICE} PROPERTIES LINKER_LANGUAGE CXX)
+set_target_properties(${PACKAGE_SERVICE} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+
+target_link_libraries(${PACKAGE_SERVICE} PRIVATE 
+                             ${CMAKE_THREAD_LIBS_INIT} 
+                             ${Poco_LIBRARIES}
+                             "PocoData"
+                             "PocoDataMySQL"
+                             "mysqlclient"
+                             ZLIB::ZLIB)
 
 
