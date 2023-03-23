@@ -87,29 +87,6 @@ private:
         return true;
     };
 
-    bool check_email(const std::string &email, std::string &reason)
-    {
-        if (email.find('@') == std::string::npos)
-        {
-            reason = "Email must contain @";
-            return false;
-        }
-
-        if (email.find(' ') != std::string::npos)
-        {
-            reason = "EMail can't contain spaces";
-            return false;
-        }
-
-        if (email.find('\t') != std::string::npos)
-        {
-            reason = "EMail can't contain spaces";
-            return false;
-        }
-
-        return true;
-    };
-
 public:
     UserHandler(const std::string &format) : _format(format)
     {
@@ -140,6 +117,36 @@ public:
                     response.setContentType("application/json");
                     std::ostream &ostr = response.send();
                     Poco::JSON::Stringifier::stringify(remove_password(result->toJSON()), ostr);
+                    return;
+                }
+                else
+                {
+                    response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_NOT_FOUND);
+                    response.setChunkedTransferEncoding(true);
+                    response.setContentType("application/json");
+                    Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
+                    root->set("type", "/errors/not_found");
+                    root->set("title", "Internal exception");
+                    root->set("status", "404");
+                    root->set("detail", "user ot found");
+                    root->set("instance", "/user");
+                    std::ostream &ostr = response.send();
+                    Poco::JSON::Stringifier::stringify(root, ostr);
+                    return;
+                }
+            }
+            else if (hasSubstr(request.getURI(), "/read_by_login"))
+            {
+                long login = atol(form.get("login").c_str());
+
+                std::optional<database::User> result = database::User::read_by_login(login);
+                if (result)
+                {
+                    response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+                    response.setChunkedTransferEncoding(true);
+                    response.setContentType("application/json");
+                    std::ostream &ostr = response.send();
+                    Poco::JSON::Stringifier::stringify(result->toJSON(), ostr);
                     return;
                 }
                 else

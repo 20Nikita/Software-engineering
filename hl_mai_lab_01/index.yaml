@@ -87,6 +87,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /read_by_login:
+    get:
+      summary: Чтение информации о пользователе
+      parameters:
+      - name: login
+        description: login пользователя
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/user_id'
+      responses:
+        '200':
+          description: Найденный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        404:
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     post:
       summary: Добавление нового пользователя
       parameters:
