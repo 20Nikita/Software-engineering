@@ -106,7 +106,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+  /post:
     post:
       summary: Добавление нового пользователя
       parameters:

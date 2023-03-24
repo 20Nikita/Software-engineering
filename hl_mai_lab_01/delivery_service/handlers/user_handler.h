@@ -212,7 +212,6 @@ public:
                     user.date() = form.get("date");
                     user.state() = form.get("state");
 
-
                     bool check_result = true;
                     std::string message;
                     std::string reason;

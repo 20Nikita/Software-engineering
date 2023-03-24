@@ -202,11 +202,10 @@ namespace database
                 use(_sender_name),
                 use(_recipient_addres),
                 use(_sender_addres),
-                use(_date);
+                use(_date),
                 use(_state);
             insert.execute();
 
-            std::cout<<"***\n"<<_state<<"\n***\n";
             Poco::Data::Statement select(session);
             select << "SELECT LAST_INSERT_ID()",
                 into(_id),
