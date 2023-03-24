@@ -166,8 +166,8 @@ namespace database
                 use(_date);
                 use(_state);
             insert.execute();
-            std::cout<<"***\n"<<_recipient_name<<"\n***\n";
 
+            std::cout<<"***\n"<<_state<<"\n***\n";
             Poco::Data::Statement select(session);
             select << "SELECT LAST_INSERT_ID()",
                 into(_id),
