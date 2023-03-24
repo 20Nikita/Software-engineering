@@ -1,0 +1,180 @@
+openapi: '3.0.0'
+info:
+  version: '1.0.0'
+  title: 'Arch Lab Example API'
+  description: API для второго домашнего задания по курсу Архитектура программных систем
+servers:
+  - url: http://localhost:8081
+    description: Example server
+paths:
+  /read_by_names:
+    get:
+      summary: Чтение информации о пользователе
+      parameters:
+      - name: recipient_name
+        description: login пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: sender_name
+        description: login пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Найденный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        404:
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /user:
+    get:
+      summary: Чтение информации о пользователе
+      parameters:
+      - name: id
+        description: Уникальный идентификатор пользователя
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/user_id'
+      responses:
+        '200':
+          description: Найденный пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        404:
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      summary: Добавление нового пользователя
+      parameters:
+      - name: recipient_name
+        description: Имя пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: sender_name
+        description: Фамилия пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: recipient_addres
+        description: Адрес пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: sender_addres
+        description: login пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: date
+        description: пароль пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: state
+        description: пароль пользователя
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Идентификатор, добавленного пользователя
+          content:
+            application/json:
+              schema:
+                type: integer
+        404:
+          description: Ошибка добавления пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    user_id:
+      description: Уникальный идентификатор пользователя
+      type: integer
+    users:
+      type: array
+      items:
+        $ref: '#/components/schemas/user'
+    user:
+      type: object
+      required:
+        - id
+        - recipient_name
+        - sender_name
+        - recipient_addres
+        - sender_addres
+        - date
+        - state
+      properties:
+        id:
+          $ref: '#/components/schemas/user_id'
+        recipient_name:
+          type: string
+        sender_name:
+          type: string
+        recipient_addres:
+          type: string
+        sender_addres:
+          type: string
+        date:
+          type: string
+        state:
+          type: string
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          description: Сообщение о ошибке
+          type: string
+  securitySchemes:
+      basicAuth:     
+        type: http
+        scheme: basic
+security:
+  - basicAuth: []

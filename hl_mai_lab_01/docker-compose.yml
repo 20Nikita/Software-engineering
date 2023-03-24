@@ -45,6 +45,7 @@ services:
     depends_on:
       mai-db-node-ex01:
         condition: service_healthy
+
   package_service:
     build:
       context: .
@@ -65,6 +66,25 @@ services:
       mai-db-node-ex01:
         condition: service_healthy
 
+  delivery_service:
+    build:
+      context: .
+      dockerfile: delivery_service/Dockerfile
+    container_name: delivery_service
+    environment:
+      - DB_HOST=mai-db-node-ex01
+      - DB_PORT=3306
+      - DB_LOGIN=stud
+      - DB_PASSWORD=stud
+      - DB_DATABASE=archdb
+      - SERVICE_HOST=my_service
+    ports:
+      - 8081:8081
+    networks:
+      - arch-network
+    depends_on:
+      mai-db-node-ex01:
+        condition: service_healthy
 
 volumes:
   db-node-ex01-data:

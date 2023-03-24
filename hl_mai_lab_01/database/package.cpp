@@ -153,7 +153,7 @@ namespace database
             std::vector<Package> result;
             Package a;
             login += "%";
-            select << "SELECT id, name, weight, price, addres, login FROM Package where login LIKE ?",
+            select << "SELECT id, name, weight, price, login FROM Package where login LIKE ?",
                 into(a._id),
                 into(a._name),
                 into(a._weight),
