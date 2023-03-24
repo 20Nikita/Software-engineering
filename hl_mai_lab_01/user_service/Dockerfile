@@ -8,4 +8,4 @@ RUN git clone -b master https://github.com/pocoproject/poco.git && cd poco && mk
 COPY . /Software-engineering/
 RUN sudo ldconfig
 RUN cd Software-engineering && mkdir build && cd build && cmake  .. && make
-ENTRYPOINT [ "Software-engineering/build/Software-engineering" ]
+ENTRYPOINT [ "Software-engineering/build/user_service" ]

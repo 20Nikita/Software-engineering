@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.2)
 
 project(hl_server C CXX)
 
-SET (EXAMPLE_BINARY "Software-engineering")
+SET (EXAMPLE_BINARY "user_service")
 SET (PACKAGE_SERVICE "package_service")
 SET (DELIVERY_SERVICE "delivery_service")
 
@@ -24,7 +24,7 @@ link_directories("/usr/local/lib")
 SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(${EXAMPLE_BINARY} main.cpp 
+add_executable(${EXAMPLE_BINARY} user_main.cpp 
                                  config/config.cpp 
                                  database/database.cpp
                                  database/user.cpp)

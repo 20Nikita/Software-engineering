@@ -27,11 +27,11 @@ services:
     volumes:
       - db-node-ex01-data:/var/lib/mysql
 
-  my_service:
+  user_service:
     build:
       context: .
-      dockerfile: my_service/Dockerfile
-    container_name: my_service
+      dockerfile: user_service/Dockerfile
+    container_name: user_service
     environment:
       - DB_HOST=mai-db-node-ex01
       - DB_PORT=3306

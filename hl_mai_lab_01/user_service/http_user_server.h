@@ -40,14 +40,14 @@ using Poco::Util::ServerApplication;
 #include "http_request_factory.h"
 #include "../database/user.h"
 
-class HTTPWebServer : public Poco::Util::ServerApplication
+class HTTPUserServer : public Poco::Util::ServerApplication
 {
 public:
-    HTTPWebServer() : _helpRequested(false)
+    HTTPUserServer() : _helpRequested(false)
     {
     }
 
-    ~HTTPWebServer()
+    ~HTTPUserServer()
     {
     }
 

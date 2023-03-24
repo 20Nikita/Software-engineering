@@ -107,7 +107,7 @@ public:
         
         try
         {
-            if (form.has("id") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
+            if (hasSubstr(request.getURI(), "/get_state") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
             {
                 long id = atol(form.get("id").c_str());
 
@@ -137,7 +137,37 @@ public:
                     return;
                 }
             }
-            
+            else if (hasSubstr(request.getURI(), "/set_state"))
+            {
+                long id = atol(form.get("id").c_str());
+                std::string state = form.get("state");
+
+                std::optional<database::Delivery> result = database::Delivery::set_state(id, state);
+                if (result)
+                {
+                    response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+                    response.setChunkedTransferEncoding(true);
+                    response.setContentType("application/json");
+                    std::ostream &ostr = response.send();
+                    Poco::JSON::Stringifier::stringify(remove_password(result->toJSON()), ostr);
+                    return;
+                }
+                else
+                {
+                    response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_NOT_FOUND);
+                    response.setChunkedTransferEncoding(true);
+                    response.setContentType("application/json");
+                    Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
+                    root->set("type", "/errors/not_found");
+                    root->set("title", "Internal exception");
+                    root->set("status", "404");
+                    root->set("detail", "user ot found");
+                    root->set("instance", "/user");
+                    std::ostream &ostr = response.send();
+                    Poco::JSON::Stringifier::stringify(root, ostr);
+                    return;
+                }
+            }
             else if (hasSubstr(request.getURI(), "/read_by_names"))
             {
                 std::string recipient_name = form.get("recipient_name");

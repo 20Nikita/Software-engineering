@@ -91,7 +91,8 @@ namespace database
             Poco::Data::Session session = database::Database::get().create_session();
             Poco::Data::Statement select(session);
             Delivery a;
-            select << "SELECT state FROM Delivery where id=?",
+            select << "SELECT id, state FROM Delivery where id=?",
+                into(a._id),
                 into(a._state),
                 use(id),
                 range(0, 1); //  iterate over result set one row at a time
@@ -99,6 +100,44 @@ namespace database
             select.execute();
             Poco::Data::RecordSet rs(select);
             if (rs.moveFirst()) return a;
+        }
+
+        catch (Poco::Data::MySQL::ConnectionException &e)
+        {
+            std::cout << "connection:" << e.what() << std::endl;
+        }
+        catch (Poco::Data::MySQL::StatementException &e)
+        {
+
+            std::cout << "statement:" << e.what() << std::endl;
+            
+        }
+        return {};
+    }
+
+    std::optional<Delivery> Delivery::set_state(long id, std::string state)
+    {
+        try
+        {
+            Poco::Data::Session session = database::Database::get().create_session();
+            Poco::Data::Statement select(session);
+            Delivery a;
+            select << "UPDATE Delivery SET state=? where id=?",
+                use(state),
+                use(id),
+                range(0, 1); //  iterate over result set one row at a time
+            select.execute();
+            
+            Poco::Data::Session session2 = database::Database::get().create_session();
+            Poco::Data::Statement select2(session2);
+            select2 << "SELECT state FROM Delivery where id=?",
+                into(a._state),
+                use(id),
+                range(0, 1);
+            a._id = id;
+            select2.execute();
+            Poco::Data::RecordSet rs(select2);
+            if (a._state==state) return a;
         }
 
         catch (Poco::Data::MySQL::ConnectionException &e)
