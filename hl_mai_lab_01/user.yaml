@@ -60,14 +60,14 @@ paths:
                 type: string
   /read_by_login:
     get:
-      summary: Чтение информации о пользователе
+      summary: Полечение адреса, имени, фамилии и id по логину пользователя.
       parameters:
       - name: login
         description: login пользователя
         in: query
         required: true
         schema:
-          $ref: '#/components/schemas/user_id'
+          type: string
       responses:
         '200':
           description: Найденный пользователь

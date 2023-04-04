@@ -44,7 +44,12 @@ using Poco::Util::OptionCallback;
 using Poco::Util::OptionSet;
 using Poco::Util::ServerApplication;
 
+#include <Poco/Base64Encoder.h>
+#include "Poco/Net/HTTPSClientSession.h"
+#include "Poco/URI.h"
+
 #include "../../database/delivery.h"
+#include "../../database/user.h"
 #include "../../helper.h"
 
 static bool hasSubstr(const std::string &str, const std::string &substr)
@@ -91,6 +96,70 @@ private:
 public:
     UserHandler(const std::string &format) : _format(format)
     {
+    }
+
+    std::optional<std::string> do_get(const std::string &url, const std::string &login, const std::string &password)
+    {
+        std::string string_result;
+        try
+        {
+            std :: cout<<1;
+            std::string token = login + ":" + password;
+            std :: cout<<2;
+            std::ostringstream os;
+            std :: cout<<3;
+            Poco::Base64Encoder b64in(os);
+            std :: cout<<4;
+            b64in << token;
+            b64in.close();
+            std :: cout<<5;
+            std::string identity = "Basic " + os.str();
+            std :: cout<<6;
+
+            Poco::URI uri(url);
+            std :: cout<<7;
+            Poco::Net::HTTPClientSession s(uri.getHost(), uri.getPort());
+            std :: cout<<8<<" "<<uri.getHost()<<" "<< uri.getPort();
+            Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, uri.toString());
+            request.setVersion(Poco::Net::HTTPMessage::HTTP_1_1);
+            std :: cout<<9;
+            request.setContentType("application/json");
+            std :: cout<<10;
+            request.set("Authorization", identity);
+            std :: cout<<11;
+            request.set("Accept", "application/json");
+            std :: cout<<12;
+            request.setKeepAlive(true);
+
+            std :: cout<<13;
+            s.sendRequest(request);
+
+            std :: cout<<14;
+            Poco::Net::HTTPResponse response;
+            std :: cout<<15;
+            std::istream &rs = s.receiveResponse(response);
+            std :: cout<<16;
+
+            while (rs)
+            {
+                char c{};
+                rs.read(&c, 1);
+                if (rs)
+                    string_result += c;
+            }
+            std :: cout<<17;
+
+            if (response.getStatus() != 200)
+                return {};
+            std :: cout<<3;
+        }
+        catch (Poco::Exception &ex)
+        {
+            std::cout << "exception:" << ex.what() << std::endl;
+            return std::optional<std::string>();
+        }
+
+        return string_result;
     }
 
     Poco::JSON::Object::Ptr remove_password(Poco::JSON::Object::Ptr src)
@@ -201,7 +270,20 @@ public:
             }
             else if (request.getMethod() == Poco::Net::HTTPRequest::HTTP_POST)
             {
+                std::string scheme;
+                std::string info;
+                request.getCredentials(scheme, info);
+                std::cout << "scheme: " << scheme << " identity: " << info << std::endl;
 
+                std::string login, password, url;
+                get_identity(info, login, password);
+                std::string host = "localhost";
+                url = "http://" + host+":8080/auth";
+                std::cout << "login: "<< login << " password: " << password<< " url: " << url << "\n";
+                std::optional<std::string> t = do_get(url, login, password);
+                int t1 = 0;
+                if (t) t1 = 1;
+                std::cout  << "do_get: " << t1 << "\n";
                 if (form.has("recipient_name") && form.has("sender_name") && form.has("recipient_addres") && form.has("sender_addres") && form.has("date") && form.has("state"))
                 {
                     database::Delivery user;

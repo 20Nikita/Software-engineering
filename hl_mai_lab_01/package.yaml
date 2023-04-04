@@ -19,13 +19,13 @@ paths:
           type: string
       responses:
         '200':
-          description: The users for the provided masks
+          description: Найденные посылки
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/users'
         404:
-          description: No user found for the provided mask
+          description: Не удалось найти посылки
           content:
             application/json:
               schema:
@@ -38,7 +38,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /user:
     get:
-      summary: Чтение информации о посылке
+      summary: Получение всей информации о посылке по её id
       parameters:
       - name: id
         description: Уникальный идентификатор посылки
@@ -48,13 +48,13 @@ paths:
           $ref: '#/components/schemas/user_id'
       responses:
         '200':
-          description: Найденный пользователь
+          description: Найденная посылка
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/user'
         404:
-          description: Пользователь не найден
+          description: Посылка не найдена
           content:
             application/json:
               schema:
@@ -107,7 +107,7 @@ paths:
               schema:
                 type: integer
         404:
-          description: Ошибка добавления пользователя
+          description: Ошибка создания посылки
           content:
             application/json:
               schema:

@@ -9,29 +9,29 @@ servers:
 paths:
   /read_by_names:
     get:
-      summary: Чтение информации о пользователе
+      summary: Получение всей информации о посылке по логину получателя и отправителя
       parameters:
       - name: recipient_name
-        description: login пользователя
+        description: login получатель
         in: query
         required: true
         schema:
           type: string
       - name: sender_name
-        description: login пользователя
+        description: login отправителя
         in: query
         required: true
         schema:
           type: string
       responses:
         '200':
-          description: Найденный пользователь
+          description: Найденная посылка
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user'
+                $ref: '#/components/schemas/users'
         404:
-          description: Пользователь не найден
+          description: посылка не найдена
           content:
             application/json:
               schema:
@@ -44,29 +44,29 @@ paths:
                 $ref: '#/components/schemas/Error'
   /set_state:
     get:
-      summary: Чтение информации о пользователе
+      summary: Изменение состояния посылки
       parameters:
       - name: id
-        description: Уникальный идентификатор пользователя
+        description: Уникальный идентификатор посылки
         in: query
         required: true
         schema:
           $ref: '#/components/schemas/user_id'
       - name: state
-        description: state пользователя
+        description: новое состояние посылки
         in: query
         required: true
         schema:
           type: string
       responses:
         '200':
-          description: Найденный пользователь
+          description: Новое состояние посылки
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user'
+                $ref: '#/components/schemas/id_stage'
         404:
-          description: Пользователь не найден
+          description: Посылка не найдена
           content:
             application/json:
               schema:
@@ -79,7 +79,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /get_state:
     get:
-      summary: Чтение информации о пользователе
+      summary: Получение статуса посылки по уникальному id
       parameters:
       - name: id
         description: Уникальный идентификатор пользователя
@@ -89,13 +89,13 @@ paths:
           $ref: '#/components/schemas/user_id'
       responses:
         '200':
-          description: Найденный пользователь
+          description: Найденная посылка
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user'
+                $ref: '#/components/schemas/id_stage'
         404:
-          description: Пользователь не найден
+          description: Посылка не найдена
           content:
             application/json:
               schema:
@@ -108,53 +108,53 @@ paths:
                 $ref: '#/components/schemas/Error'
   /post:
     post:
-      summary: Добавление нового пользователя
+      summary: Добавление новой посылки
       parameters:
       - name: recipient_name
-        description: Имя пользователя
+        description: Имя получателя
         in: query
         required: true
         schema:
           type: string
       - name: sender_name
-        description: Фамилия пользователя
+        description: Имя отправителя
         in: query
         required: true
         schema:
           type: string
       - name: recipient_addres
-        description: Адрес пользователя
+        description: Адрес получателя
         in: query
         required: true
         schema:
           type: string
       - name: sender_addres
-        description: login пользователя
+        description: Адрес отправителя
         in: query
         required: true
         schema:
           type: string
       - name: date
-        description: пароль пользователя
+        description: Дата создания посылки
         in: query
         required: true
         schema:
           type: string
       - name: state
-        description: пароль пользователя
+        description: Статус посылки
         in: query
         required: true
         schema:
           type: string
       responses:
         '200':
-          description: Идентификатор, добавленного пользователя
+          description: Идентификатор, добавленной посылки
           content:
             application/json:
               schema:
                 type: integer
         404:
-          description: Ошибка добавления пользователя
+          description: Ошибка добавления посылки
           content:
             application/json:
               schema:
@@ -168,8 +168,18 @@ paths:
 components:
   schemas:
     user_id:
-      description: Уникальный идентификатор пользователя
+      description: Уникальный идентификатор посылки
       type: integer
+    id_stage:
+      type: object
+      required:
+        - integer
+        - state
+      properties:
+        id:
+          $ref: '#/components/schemas/user_id'
+        state:
+          type: string
     users:
       type: array
       items:
