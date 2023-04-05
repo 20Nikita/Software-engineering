@@ -9,7 +9,7 @@ servers:
 paths:
   /read_by_names:
     get:
-      summary: Получение всей информации о посылке по логину получателя и отправителя
+      summary: Получение всей информации о посылках по логину получателя и отправителя
       parameters:
       - name: recipient_name
         description: login получатель
@@ -106,7 +106,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /post:
+  /add_delivery:
     post:
       summary: Добавление новой посылки
       parameters:

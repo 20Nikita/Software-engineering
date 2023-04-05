@@ -31,7 +31,6 @@ namespace database
                         << "`weight` VARCHAR(256) NOT NULL,"
                         << "`price` VARCHAR(256) NOT NULL,"
                         << "`login` VARCHAR(256) NOT NULL,"
-                        << "`password` VARCHAR(256) NOT NULL,"
                         << "PRIMARY KEY (`id`), KEY `lo` (`login`));",
                 now;
         }
@@ -58,7 +57,6 @@ namespace database
         root->set("weight", _weight);
         root->set("price", _price);
         root->set("login", _login);
-        root->set("password", _password);
 
         return root;
     }
@@ -75,40 +73,11 @@ namespace database
         package.weight() = object->getValue<std::string>("weight");
         package.price() = object->getValue<std::string>("price");
         package.login() = object->getValue<std::string>("login");
-        package.password() = object->getValue<std::string>("password");
 
         return package;
     }
 
-    std::optional<long> Package::auth(std::string &login, std::string &password)
-    {
-        try
-        {
-            Poco::Data::Session session = database::Database::get().create_session();
-            Poco::Data::Statement select(session);
-            long id;
-            select << "SELECT id FROM Package where login=? and password=?",
-                into(id),
-                use(login),
-                use(password),
-                range(0, 1); //  iterate over result set one row at a time
-
-            select.execute();
-            Poco::Data::RecordSet rs(select);
-            if (rs.moveFirst()) return id;
-        }
-
-        catch (Poco::Data::MySQL::ConnectionException &e)
-        {
-            std::cout << "connection:" << e.what() << std::endl;
-        }
-        catch (Poco::Data::MySQL::StatementException &e)
-        {
-
-            std::cout << "statement:" << e.what() << std::endl;
-        }
-        return {};
-    }
+    
     std::optional<Package> Package::read_by_id(long id)
     {
         try
@@ -116,13 +85,12 @@ namespace database
             Poco::Data::Session session = database::Database::get().create_session();
             Poco::Data::Statement select(session);
             Package a;
-            select << "SELECT id, name, weight, price, login, password FROM Package where id=?",
+            select << "SELECT id, name, weight, price, login FROM Package where id=?",
                 into(a._id),
                 into(a._name),
                 into(a._weight),
                 into(a._price),
                 into(a._login),
-                into(a._password),
                 use(id),
                 range(0, 1); //  iterate over result set one row at a time
 
@@ -153,7 +121,7 @@ namespace database
             std::vector<Package> result;
             Package a;
             login += "%";
-            select << "SELECT id, name, weight, price, addres, login FROM Package where login LIKE ?",
+            select << "SELECT id, name, weight, price, login FROM Package where login LIKE ?",
                 into(a._id),
                 into(a._name),
                 into(a._weight),
@@ -191,12 +159,11 @@ namespace database
             Poco::Data::Session session = database::Database::get().create_session();
             Poco::Data::Statement insert(session);
 
-            insert << "INSERT INTO Package (name,weight,price,login,password) VALUES(?, ?, ?, ?, ?)",
+            insert << "INSERT INTO Package (name,weight,price,login) VALUES(?, ?, ?, ?)",
                 use(_name),
                 use(_weight),
                 use(_price),
                 use(_login),
-                use(_password);
 
             insert.execute();
 
@@ -229,19 +196,9 @@ namespace database
         return _login;
     }
 
-    const std::string &Package::get_password() const
-    {
-        return _password;
-    }
-
     std::string &Package::login()
     {
         return _login;
-    }
-
-    std::string &Package::password()
-    {
-        return _password;
     }
 
     long Package::get_id() const

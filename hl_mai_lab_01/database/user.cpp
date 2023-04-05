@@ -143,14 +143,15 @@ namespace database
         return {};
     }
 
-    std::optional<User> User::read_by_login(long login)
+    std::optional<User> User::read_by_login(std::string &login)
     {
         try
         {
             Poco::Data::Session session = database::Database::get().create_session();
             Poco::Data::Statement select(session);
             User a;
-            select << "SELECT first_name, last_name, addres FROM User where login=?",
+            select << "SELECT id, first_name, last_name, addres FROM User where login=?",
+                into(a._id),
                 into(a._first_name),
                 into(a._last_name),
                 into(a._addres),

@@ -7,7 +7,7 @@ servers:
   - url: http://localhost:8080
     description: Example server
 paths:
-  /search:
+  /search_name_surname:
     get:
       summary: Поиск пользователей по маске имени и фамилии
       parameters:
@@ -87,7 +87,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /user:
+  /user_by_id:
     get:
       summary: Чтение информации о пользователе
       parameters:
@@ -116,7 +116,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
+  /add_user:
     post:
       summary: Добавление нового пользователя
       parameters:

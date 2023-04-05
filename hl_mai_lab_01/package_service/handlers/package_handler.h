@@ -83,18 +83,6 @@ private:
             return false;
         }
 
-        if (name.find(' ') != std::string::npos)
-        {
-            reason = "Name can't contain spaces";
-            return false;
-        }
-
-        if (name.find('\t') != std::string::npos)
-        {
-            reason = "Name can't contain spaces";
-            return false;
-        }
-
         return true;
     };
 
@@ -149,59 +137,57 @@ public:
         return string_result;
     }
 
-    Poco::JSON::Object::Ptr remove_password(Poco::JSON::Object::Ptr src)
-    {
-        if (src->has("password"))
-            src->set("password", "*******");
-        return src;
-    }
-
     void handleRequest(HTTPServerRequest &request,
                        HTTPServerResponse &response)
     {
         HTMLForm form(request, request.stream());
-        
+
         try
         {
-            if (form.has("id") && (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET))
+            std::string scheme;
+            std::string info;
+            request.getCredentials(scheme, info);
+            std::string login, password, url;
+            get_identity(info, login, password);
+            url = "http://" + host+":8080/auth";
+            if (do_get(url, login, password))
             {
-                long id = atol(form.get("id").c_str());
-
-                std::optional<database::Package> result = database::Package::read_by_id(id);
-                if (result)
+                if (form.has("id") && hasSubstr(request.getURI(), "/get_package_by_id"))
                 {
-                    response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
-                    response.setChunkedTransferEncoding(true);
-                    response.setContentType("application/json");
-                    std::ostream &ostr = response.send();
-                    Poco::JSON::Stringifier::stringify(remove_password(result->toJSON()), ostr);
-                    return;
-                }
-                else
-                {
-                    response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_NOT_FOUND);
-                    response.setChunkedTransferEncoding(true);
-                    response.setContentType("application/json");
-                    Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
-                    root->set("type", "/errors/not_found");
-                    root->set("title", "Internal exception");
-                    root->set("status", "404");
-                    root->set("detail", "user ot found");
-                    root->set("instance", "/user");
-                    std::ostream &ostr = response.send();
-                    Poco::JSON::Stringifier::stringify(root, ostr);
-                    return;
-                }
-            }
-            
-            else if (hasSubstr(request.getURI(), "/search"))
-            {
+                    long id = atol(form.get("id").c_str());
 
-                    std::string login2 = form.get("login");
-                    auto results = database::Package::search(login2);
+                    std::optional<database::Package> result = database::Package::read_by_id(id);
+                    if (result)
+                    {
+                        response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
+                        response.setChunkedTransferEncoding(true);
+                        response.setContentType("application/json");
+                        std::ostream &ostr = response.send();
+                        Poco::JSON::Stringifier::stringify(result->toJSON(), ostr);
+                        return;
+                    }
+                    else
+                    {
+                        response.setStatus(Poco::Net::HTTPResponse::HTTPStatus::HTTP_NOT_FOUND);
+                        response.setChunkedTransferEncoding(true);
+                        response.setContentType("application/json");
+                        Poco::JSON::Object::Ptr root = new Poco::JSON::Object();
+                        root->set("type", "/errors/not_found");
+                        root->set("title", "Internal exception");
+                        root->set("status", "404");
+                        root->set("detail", "user ot found");
+                        root->set("instance", "/user");
+                        std::ostream &ostr = response.send();
+                        Poco::JSON::Stringifier::stringify(root, ostr);
+                        return;
+                    }
+                }
+                else if (hasSubstr(request.getURI(), "/search_by_login"))
+                {
+                    auto results = database::Package::search(login);
                     Poco::JSON::Array arr;
                     for (auto s : results)
-                        arr.add(remove_password(s.toJSON()));
+                        arr.add(s.toJSON());
                     response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
                     response.setChunkedTransferEncoding(true);
                     response.setContentType("application/json");
@@ -209,27 +195,16 @@ public:
                     Poco::JSON::Stringifier::stringify(arr, ostr);
 
                     return;
-            }
-            else if (request.getMethod() == Poco::Net::HTTPRequest::HTTP_POST)
-            {
-
-                std::string host = "localhost";
-                std::string url;
-                if(std::getenv("SERVICE_HOST")!=nullptr) host = std::getenv("SERVICE_HOST");
-                url = "http://" + host+":8080/auth";
-
-
-                if (form.has("name") && form.has("weight") && form.has("price") && form.has("login") && form.has("password"))
+                }
+                else if (hasSubstr(request.getURI(), "/add_package"))
                 {
-                    database::Package user;
-                    user.name() = form.get("name");
-                    user.weight() = form.get("weight");
-                    user.price() = form.get("price");
-                    user.login() = form.get("login");
-                    user.password() = form.get("password");
-                    if (do_get(url, user.get_login(), user.get_password())) // do authentificate
+                    if (form.has("name") && form.has("weight") && form.has("price"))
                     {
-
+                        database::Package user;
+                        user.name() = form.get("name");
+                        user.weight() = form.get("weight");
+                        user.price() = form.get("price");
+                        user.login() = login;
 
                         bool check_result = true;
                         std::string message;

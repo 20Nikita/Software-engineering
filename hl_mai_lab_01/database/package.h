@@ -15,7 +15,6 @@ namespace database
             std::string _weight;
             std::string _price;
             std::string _login;
-            std::string _password;
 
         public:
 
@@ -26,18 +25,15 @@ namespace database
             const std::string &get_weight() const;
             const std::string &get_price() const;
             const std::string &get_login() const;
-            const std::string &get_password() const;
 
             long&        id();
             std::string &name();
             std::string &weight();
             std::string &price();
             std::string &login();
-            std::string &password();
 
             static void init();
             static std::optional<Package> read_by_id(long id);
-            static std::optional<long> auth(std::string &login, std::string &password);
             static std::vector<Package> search(std::string login);
             void save_to_mysql();
 

@@ -153,12 +153,13 @@ namespace database
         return {};
     }
 
-    std::optional<Delivery> Delivery::read_by_names(std::string recipient_name,std::string sender_name)
+    std::vector<Delivery> Delivery::read_by_names(std::string recipient_name,std::string sender_name)
     {
         try
         {
             Poco::Data::Session session = database::Database::get().create_session();
             Poco::Data::Statement select(session);
+            std::vector<Delivery> result;
             Delivery a;
             select << "SELECT id, recipient_name, sender_name, recipient_addres, sender_addres, date, state FROM Delivery where recipient_name=? and sender_name=?",
                 into(a._id),
@@ -171,22 +172,25 @@ namespace database
                 use(recipient_name),
                 use(sender_name),
                 range(0, 1); //  iterate over result set one row at a time
-            select.execute();
-            Poco::Data::RecordSet rs(select);
-            if (rs.moveFirst()) return a;
+            while (!select.done())
+            {
+                if (select.execute())
+                    result.push_back(a);
+            }
+            return result;
         }
 
         catch (Poco::Data::MySQL::ConnectionException &e)
         {
             std::cout << "connection:" << e.what() << std::endl;
+            throw;
         }
         catch (Poco::Data::MySQL::StatementException &e)
         {
 
             std::cout << "statement:" << e.what() << std::endl;
-            
+            throw;
         }
-        return {};
     }
 
     void Delivery::save_to_mysql()
