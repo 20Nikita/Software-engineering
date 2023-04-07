@@ -93,18 +93,64 @@ namespace database
     {
         try
         {
-            Poco::Data::Session session = database::Database::get().create_session();
-            Poco::Data::Statement select(session);
-            long id;
-            select << "SELECT id FROM User where login=? and password=?",
-                into(id),
-                use(login),
-                use(password),
-                range(0, 1); //  iterate over result set one row at a time
+            // Poco::Data::Session session = database::Database::get().create_session();
+            // Poco::Data::Statement select(session);
+            // long id;
+            // select << "SELECT id FROM User where login=? and password=?",
+            //     into(id),
+            //     use(login),
+            //     use(password),
+            //     range(0, 1); //  iterate over result set one row at a time
 
-            select.execute();
-            Poco::Data::RecordSet rs(select);
-            if (rs.moveFirst()) return id;
+            // select.execute();
+            // Poco::Data::RecordSet rs(select);
+            // if (rs.moveFirst()) return id;
+
+            std::vector<long> result;
+            std::vector<std::string> hints = database::Database::get_all_hints();
+
+            std::vector<std::future<std::vector<long>>> futures;
+            for (const std::string &hint : hints)
+            {
+                auto handle = std::async(std::launch::async, [login, password, hint]() mutable -> std::vector<long>
+                                        {
+                                            std::vector<long> result;
+
+                                            Poco::Data::Session session = database::Database::get().create_session();
+                                            Statement select(session);
+                                            std::string select_str = "SELECT my_id FROM User where login='";
+                                            select_str += login;
+                                            select_str += "' and password='";
+                                            select_str += password;
+                                            select_str += "'";
+                                            select_str += hint;
+                                            select << select_str;
+                                            std::cout << select_str << std::endl;
+                                            
+                                            select.execute();
+                                            Poco::Data::RecordSet record_set(select);
+
+                                            bool more = record_set.moveFirst();
+                                            while (more)
+                                            {
+                                                long a;
+                                                a = record_set[0].convert<long>();
+                                                result.push_back(a);
+                                                more = record_set.moveNext();
+                                            }
+                                            return result; });
+
+                futures.emplace_back(std::move(handle));
+            }
+
+            for (std::future<std::vector<long>> &res : futures)
+            {
+                std::vector<long> v = res.get();
+                std::copy(std::begin(v),
+                        std::end(v),
+                        std::back_inserter(result));
+            }
+            if (result.size()) return result[0];
         }
 
         catch (Poco::Data::MySQL::ConnectionException &e)
@@ -198,7 +244,6 @@ namespace database
 
                 futures.emplace_back(std::move(handle));
             }
-            std::cout<<2<< std::endl;
 
             for (std::future<std::vector<User>> &res : futures)
             {
@@ -206,7 +251,6 @@ namespace database
                 std::copy(std::begin(v),
                         std::end(v),
                         std::back_inserter(result));
-                std::cout<<5<< std::endl;
             }
             if (result.size()) return result[0];
         }
