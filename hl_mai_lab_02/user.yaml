@@ -182,6 +182,7 @@ components:
       type: object
       required:
         - id
+        - my_id
         - first_name
         - last_name
         - addres
@@ -189,6 +190,8 @@ components:
         - password
       properties:
         id:
+          $ref: '#/components/schemas/user_id'
+        my_id:
           $ref: '#/components/schemas/user_id'
         first_name:
           type: string
