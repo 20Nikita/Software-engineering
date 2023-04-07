@@ -93,32 +93,6 @@ services:
       # Mysql Admin Port
       - "6032:6032"
 
-  mai-db-node-ex01:
-    build:
-      context: mariadb
-      dockerfile: Dockerfile
-    container_name: mai-db-node-ex01
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: archdb
-      MYSQL_USER: stud
-      MYSQL_PASSWORD: stud
-      MYSQL_ROOT_PASSWORD: '1'
-    command: >
-      --sql-mode='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION'
-      --general-log=ON
-      --log-queries-not-using-indexes=ON
-    networks:
-      - arch-network
-    ports:
-      - 3360:3306
-    healthcheck:
-      test: "/usr/bin/mysql --user=stud --password=stud --execute \"SHOW DATABASES;\""
-      timeout: 20s
-      retries: 5
-    volumes:
-      - db-node-ex01-data:/var/lib/mysql
-
   user_service:
     build:
       context: .
@@ -148,8 +122,8 @@ services:
       dockerfile: package_service/Dockerfile
     container_name: package_service
     environment:
-      - DB_HOST=mai-db-node-ex01
-      - DB_PORT=3306
+      - DB_HOST=proxysql
+      - DB_PORT=6033
       - DB_LOGIN=stud
       - DB_PASSWORD=stud
       - DB_DATABASE=archdb
@@ -159,8 +133,7 @@ services:
     networks:
       - arch-network
     depends_on:
-      mai-db-node-ex01:
-        condition: service_healthy
+      - proxysql
 
   delivery_service:
     build:
@@ -168,8 +141,8 @@ services:
       dockerfile: delivery_service/Dockerfile
     container_name: delivery_service
     environment:
-      - DB_HOST=mai-db-node-ex01
-      - DB_PORT=3306
+      - DB_HOST=proxysql
+      - DB_PORT=6033
       - DB_LOGIN=stud
       - DB_PASSWORD=stud
       - DB_DATABASE=archdb
@@ -179,8 +152,7 @@ services:
     networks:
       - arch-network
     depends_on:
-      mai-db-node-ex01:
-        condition: service_healthy
+      - proxysql
 
 volumes:
   db-node-ex01-data:

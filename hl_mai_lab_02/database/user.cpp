@@ -347,7 +347,6 @@ namespace database
 
             if (rs.moveFirst()) {
                 result += a;
-                std::cout<<hint<<" " <<a<<" " <<result<<std::endl;
             }
         }
         return result;
@@ -359,9 +358,7 @@ namespace database
         {
             Poco::Data::Session session = database::Database::get().create_session();
             long len_database = User::get_len_database();
-            std::cout << "len_database "<< len_database << std::endl;
             len_database +=1;
-            std::cout << "len_database "<< len_database << std::endl;
             std::string sharding_hint = database::Database::sharding_hint(len_database);
 
             std::string select_str = "INSERT INTO User (my_id,first_name,last_name,addres,login,password) VALUES(?, ?, ?, ?, ?, ?) ";
