@@ -93,6 +93,17 @@ services:
       # Mysql Admin Port
       - "6032:6032"
 
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning 
+    networks:
+      - arch-network
+    volumes: 
+      - cache:/data
+      
   user_service:
     build:
       context: .
@@ -104,12 +115,14 @@ services:
       - DB_LOGIN=stud
       - DB_PASSWORD=stud
       - DB_DATABASE=archdb
+      - CACHE=cache:6379
     ports:
       - 8080:8080
     networks:
       - arch-network
     depends_on:
       - proxysql
+      - cache
       - db-node-1
       - db-node-2
       - db-node-3
@@ -154,12 +167,15 @@ services:
     depends_on:
       - proxysql
 
+
+
 volumes:
   db-node-ex01-data:
   db-node-1-data:
   db-node-2-data:
   db-node-3-data:
   proxysql-data:
+  cache:
 
 networks:
   arch-network:
