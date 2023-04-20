@@ -1,0 +1,225 @@
+openapi: '3.0.0'
+info:
+  version: '1.0.0'
+  title: 'Arch Lab Example API'
+  description: API для второго домашнего задания по курсу Архитектура программных систем
+servers:
+  - url: http://localhost:8081
+    description: Example server
+paths:
+  /read_by_names:
+    get:
+      summary: Получение всей информации о посылках по логину получателя и отправителя
+      parameters:
+      - name: recipient_name
+        description: login получатель
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: sender_name
+        description: login отправителя
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Найденная посылка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/users'
+        404:
+          description: посылка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /set_state:
+    get:
+      summary: Изменение состояния посылки
+      parameters:
+      - name: id
+        description: Уникальный идентификатор посылки
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/user_id'
+      - name: state
+        description: новое состояние посылки
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Новое состояние посылки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/id_stage'
+        404:
+          description: Посылка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /get_state:
+    get:
+      summary: Получение статуса посылки по уникальному id
+      parameters:
+      - name: id
+        description: Уникальный идентификатор пользователя
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/user_id'
+      responses:
+        '200':
+          description: Найденная посылка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/id_stage'
+        404:
+          description: Посылка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /add_delivery:
+    post:
+      summary: Добавление новой посылки
+      parameters:
+      - name: recipient_name
+        description: Имя получателя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: sender_name
+        description: Имя отправителя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: recipient_addres
+        description: Адрес получателя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: sender_addres
+        description: Адрес отправителя
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: date
+        description: Дата создания посылки
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: state
+        description: Статус посылки
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Идентификатор, добавленной посылки
+          content:
+            application/json:
+              schema:
+                type: integer
+        404:
+          description: Ошибка добавления посылки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        500:
+          description: Неожиданная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    user_id:
+      description: Уникальный идентификатор посылки
+      type: integer
+    id_stage:
+      type: object
+      required:
+        - integer
+        - state
+      properties:
+        id:
+          $ref: '#/components/schemas/user_id'
+        state:
+          type: string
+    users:
+      type: array
+      items:
+        $ref: '#/components/schemas/user'
+    user:
+      type: object
+      required:
+        - id
+        - recipient_name
+        - sender_name
+        - recipient_addres
+        - sender_addres
+        - date
+        - state
+      properties:
+        id:
+          $ref: '#/components/schemas/user_id'
+        recipient_name:
+          type: string
+        sender_name:
+          type: string
+        recipient_addres:
+          type: string
+        sender_addres:
+          type: string
+        date:
+          type: string
+        state:
+          type: string
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          description: Сообщение о ошибке
+          type: string
+  securitySchemes:
+      basicAuth:     
+        type: http
+        scheme: basic
+security:
+  - basicAuth: []

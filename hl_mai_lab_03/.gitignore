@@ -1,0 +1,5 @@
+CMakeFiles/*
+.vscode/*
+build/*
+tests.cpp
+build_load_data/*
