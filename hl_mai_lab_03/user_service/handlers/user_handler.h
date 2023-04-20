@@ -116,7 +116,7 @@ public:
                     std::optional<database::User> result = database::User::read_from_cache_by_id(id);
                     if (result)
                     {
-                        //std::cout << "from cache" << std::endl;
+                        // std::cout << "from cache" << std::endl;
                         response.setStatus(Poco::Net::HTTPResponse::HTTP_OK);
                         response.setChunkedTransferEncoding(true);
                         response.setContentType("application/json");
@@ -249,6 +249,9 @@ public:
                 user.login() = form.get("login");
                 user.password() = form.get("password");
 
+                bool no_cache = false;
+                if (form.has("no_cache")) no_cache = true;
+
                 bool check_result = true;
                 std::string message;
                 std::string reason;
@@ -282,6 +285,10 @@ public:
                     response.setContentType("application/json");
                     std::ostream &ostr = response.send();
                     ostr << user.get_id();
+                    if(!no_cache){
+                        std::optional<database::User> result = database::User::read_by_login(user.login());
+                        result->save_to_cache();
+                    } 
                     return;
                 }
                 else
